@@ -1,4 +1,4 @@
-package main
+package task1
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ NTP -библиотеки. Инициализировать как go module. И
 код выхода в OS
 */
 
-func main() {
+func GetCurrentTime() {
 	time, err := ntp.Time("0.beevik-ntp.pool.ntp.org")
 	if err != nil {
 		log.Println(err)
