@@ -15,7 +15,7 @@
 должна возвращать ошибку. Написать unit-тесты.
 */
 
-package task2
+package rune_unpack
 
 import (
 	"errors"

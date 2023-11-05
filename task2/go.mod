@@ -1,3 +1,3 @@
-module github.com/Aldirane/lvl-2/task2
+module unpack-pkg
 
 go 1.21.2
