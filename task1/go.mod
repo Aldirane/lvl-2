@@ -1,4 +1,4 @@
-module github.com/Aldirane/lvl-2
+module github.com/Aldirane/lvl-2/task1
 
 go 1.21.2
 
