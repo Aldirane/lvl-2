@@ -92,6 +92,7 @@ func escapeChar(
 				*targetChar = r
 				*prevChar = rune(1)
 			} else {
+				*first = false
 				*prevChar = r
 				*repeatCount, _ = strconv.Atoi(string(*prevChar))
 			}
@@ -100,13 +101,15 @@ func escapeChar(
 		if string(r) == "\\" {
 			if string(*targetChar) != "\\" && string(*prevChar) != "\\" {
 				*first = false
+			} else if string(*targetChar) == "\\" && string(*prevChar) != "\\" {
+				*first = false
 			} else {
 				*first = true
 			}
-			writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
+			if !*first {
+				writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
+			}
 			*escaped = true
-			*targetChar = r
-			*prevChar = r
 		} else {
 			writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
 		}

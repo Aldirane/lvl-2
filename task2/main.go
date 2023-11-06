@@ -48,4 +48,46 @@ func main() {
 	} else {
 		println(result)
 	}
+	input = "qwe\\\\4\\5e"
+	result, err = unpack.UnpackString(input)
+	if err != nil {
+		println("Error:", err.Error())
+	} else {
+		println(result)
+	}
+	input = "abcd"
+	result, err = unpack.UnpackString(input)
+	if err != nil {
+		println("Error:", err.Error())
+	} else {
+		println(result)
+	}
+	input = "45"
+	result, err = unpack.UnpackString(input)
+	if err != nil {
+		println("Error:", err.Error())
+	} else {
+		println(result)
+	}
+	input = ""
+	result, err = unpack.UnpackString(input)
+	if err != nil {
+		println("Error:", err.Error())
+	} else {
+		println(result)
+	}
+	input = "qwe\\45"
+	result, err = unpack.UnpackString(input)
+	if err != nil {
+		println("Error:", err.Error())
+	} else {
+		println(result)
+	}
+	input = "qwe\\\\5"
+	result, err = unpack.UnpackString(input)
+	if err != nil {
+		println("Error:", err.Error())
+	} else {
+		println(result)
+	}
 }
