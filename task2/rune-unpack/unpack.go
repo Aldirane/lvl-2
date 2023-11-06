@@ -1,59 +1,121 @@
-/*
-Создать Go-функцию, осуществляющую примитивную распаковку
-строки, содержащую повторяющиеся символы/руны, например:
-● "a4bc2d5e" => "aaaabccddddde"
-● "abcd" => "abcd"
-● "45" => "" (некорректная строка)
-● "" => ""
-Дополнительно
-Реализовать поддержку escape-последовательностей.
-Например:
-● qwe\4\5 => qwe45 (*)
-● qwe\45 => qwe44444 (*)
-● qwe\\5 => qwe\\\\\ (*)
-В случае если была передана некорректная строка, функция
-должна возвращать ошибку. Написать unit-тесты.
-*/
-
 package rune_unpack
 
 import (
 	"errors"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 func UnpackString(input string) (string, error) {
-	var result strings.Builder
-	var repeatCount int
+	var err error
+	var strBuild strings.Builder
+	var result = ""
+	var byteStr = []byte(input)
+	var repeatCount int = 1
+	var targetChar, prevChar, escapedChar rune
 	escaped := false
-
-	for _, char := range input {
-		if escaped {
-			result.WriteRune(char)
-			escaped = false
-			continue
+	for utf8.RuneCount(byteStr) >= 0 {
+		if utf8.RuneCount(byteStr) == 0 {
+			err = escapeChar(
+				&strBuild,
+				rune(0),
+				&prevChar,
+				&targetChar,
+				&escapedChar,
+				&escaped,
+				&repeatCount)
+			break
 		}
-
-		if char == '\\' {
-			escaped = true
-			continue
-		}
-
-		if char >= '0' && char <= '9' {
-			repeatCount, _ = strconv.Atoi(string(char))
-		} else {
-			if repeatCount == 0 {
-				repeatCount = 1
+		r, size := utf8.DecodeRune(byteStr)
+		byteStr = byteStr[size:]
+		if prevChar == 0 {
+			if string(r) == "\\" {
+				escaped = true
 			}
-			result.WriteString(strings.Repeat(string(char), repeatCount))
-			repeatCount = 0
+			targetChar = r
+			prevChar = r
+			continue
+		}
+		err = escapeChar(
+			&strBuild,
+			r,
+			&prevChar,
+			&targetChar,
+			&escapedChar,
+			&escaped,
+			&repeatCount)
+		if err != nil {
+			break
 		}
 	}
+	result = strBuild.String()
+	return result, err
+}
 
-	if escaped {
-		return "", errors.New("invalid input string")
+func escapeChar(
+	strBuild *strings.Builder,
+	r rune,
+	prevChar, targetChar, escapedChar *rune,
+	escaped *bool,
+	repeatCount *int,
+) error {
+	var err error
+	if r == 0 {
+		if unicode.IsDigit(*targetChar) {
+			if !*escaped {
+				err = errors.New("Digit is not escaped")
+				return err
+			}
+		}
+		writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
 	}
+	if unicode.IsDigit(r) {
+		if unicode.IsDigit(*prevChar) {
+			if !*escaped {
+				if unicode.IsDigit(*targetChar) {
+					err = errors.New("Digit is not escaped")
+				} else {
+					*repeatCount = buidInt(*repeatCount, r)
+					*prevChar = r
+				}
+			} else {
+				*repeatCount = buidInt(*repeatCount, r)
+				*prevChar = r
+			}
+		} else {
+			if string(*targetChar) == "\\" {
+				*targetChar = r
+				*prevChar = rune(1)
+			} else {
+				*prevChar = r
+				*repeatCount, _ = strconv.Atoi(string(*prevChar))
+			}
+		}
+	} else {
+		writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
+	}
+	return err
+}
 
-	return result.String(), nil
+func writeStr(
+	strBuild *strings.Builder,
+	r rune,
+	prevChar, targetChar, escapedChar *rune,
+	escaped *bool,
+	repeatCount *int,
+) {
+	*escapedChar = *targetChar
+	*prevChar = r
+	*targetChar = *prevChar
+	strBuild.WriteString(strings.Repeat(string(*escapedChar), *repeatCount))
+	*repeatCount = 1
+	*escaped = false
+}
+
+func buidInt(repeatCount int, r rune) int {
+	intr, _ := strconv.Atoi(string(r))
+	repeatCount = repeatCount*10 + intr
+	return repeatCount
 }
