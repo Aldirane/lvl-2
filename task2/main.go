@@ -17,77 +17,23 @@
 
 package main
 
-import unpack "unpack-pkg/rune-unpack"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+	rune_unpack "unpack-pkg/rune-unpack"
+)
 
 func main() {
-	input := "\\4\\5"
-	result, err := unpack.UnpackString(input)
+	var input = ""
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	input = strings.Trim(input, "\n")
+	result, err := rune_unpack.UnpackString(input)
 	if err != nil {
-		println("Error:", err.Error())
+		fmt.Printf("Error %v\n", err)
 	} else {
-		println(result)
-	}
-	input = "a10bc2d5e2"
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
-	}
-	input = "qwe\\5\\4e"
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
-	}
-	input = "qwe\\\\4e"
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
-	}
-	input = "qwe\\\\4\\5e"
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
-	}
-	input = "abcd"
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
-	}
-	input = "45"
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
-	}
-	input = ""
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
-	}
-	input = "qwe\\45"
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
-	}
-	input = "qwe\\\\5"
-	result, err = unpack.UnpackString(input)
-	if err != nil {
-		println("Error:", err.Error())
-	} else {
-		println(result)
+		fmt.Println(result)
 	}
 }

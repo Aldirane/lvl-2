@@ -13,7 +13,7 @@ func UnpackString(input string) (string, error) {
 	var strBuild strings.Builder
 	var result = ""
 	var byteStr = []byte(input)
-	var repeatCount int = 1
+	var repeatCount = 1
 	var targetChar, prevChar, escapedChar rune
 	escaped := false
 	first := false
@@ -68,26 +68,31 @@ func escapeChar(
 	if r == 0 {
 		if unicode.IsDigit(*targetChar) {
 			if !*escaped {
-				err = errors.New("Digit is not escaped")
+				err = errors.New("digit is not escaped")
 				return err
 			}
 		}
+		if *targetChar == 0 {
+			*targetChar, _ = utf8.DecodeRune([]byte(""))
+			*repeatCount = 0
+		}
 		writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
+		return nil
 	}
 	if unicode.IsDigit(r) {
 		if unicode.IsDigit(*prevChar) {
 			if !*escaped {
 				if unicode.IsDigit(*targetChar) {
-					err = errors.New("Digit is not escaped")
+					err = errors.New("digit is not escaped")
 				} else {
-					*repeatCount = buidInt(*repeatCount, r)
+					*repeatCount = addInt(*repeatCount, r)
 					*prevChar = r
 				}
 			} else {
-				*repeatCount = buidInt(*repeatCount, r)
+				*repeatCount = addInt(*repeatCount, r)
 				*prevChar = r
 			}
-		} else { // "\\4\\5"
+		} else {
 			if string(*targetChar) == "\\" && *first == false {
 				*targetChar = r
 				*prevChar = rune(1)
@@ -132,8 +137,8 @@ func writeStr(
 	*escaped = false
 }
 
-func buidInt(repeatCount int, r rune) int {
-	intr, _ := strconv.Atoi(string(r))
-	repeatCount = repeatCount*10 + intr
+func addInt(repeatCount int, r rune) int {
+	intRune, _ := strconv.Atoi(string(r))
+	repeatCount = repeatCount*10 + intRune
 	return repeatCount
 }
