@@ -16,6 +16,7 @@ func UnpackString(input string) (string, error) {
 	var repeatCount int = 1
 	var targetChar, prevChar, escapedChar rune
 	escaped := false
+	first := false
 	for utf8.RuneCount(byteStr) >= 0 {
 		if utf8.RuneCount(byteStr) == 0 {
 			err = escapeChar(
@@ -25,15 +26,16 @@ func UnpackString(input string) (string, error) {
 				&targetChar,
 				&escapedChar,
 				&escaped,
+				&first,
 				&repeatCount)
 			break
 		}
 		r, size := utf8.DecodeRune(byteStr)
 		byteStr = byteStr[size:]
+		if string(r) == "\\" {
+			escaped = true
+		}
 		if prevChar == 0 {
-			if string(r) == "\\" {
-				escaped = true
-			}
 			targetChar = r
 			prevChar = r
 			continue
@@ -45,6 +47,7 @@ func UnpackString(input string) (string, error) {
 			&targetChar,
 			&escapedChar,
 			&escaped,
+			&first,
 			&repeatCount)
 		if err != nil {
 			break
@@ -58,7 +61,7 @@ func escapeChar(
 	strBuild *strings.Builder,
 	r rune,
 	prevChar, targetChar, escapedChar *rune,
-	escaped *bool,
+	escaped, first *bool,
 	repeatCount *int,
 ) error {
 	var err error
@@ -84,8 +87,8 @@ func escapeChar(
 				*repeatCount = buidInt(*repeatCount, r)
 				*prevChar = r
 			}
-		} else {
-			if string(*targetChar) == "\\" {
+		} else { // "\\4\\5"
+			if string(*targetChar) == "\\" && *first == false {
 				*targetChar = r
 				*prevChar = rune(1)
 			} else {
@@ -94,7 +97,19 @@ func escapeChar(
 			}
 		}
 	} else {
-		writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
+		if string(r) == "\\" {
+			if string(*targetChar) != "\\" && string(*prevChar) != "\\" {
+				*first = false
+			} else {
+				*first = true
+			}
+			writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
+			*escaped = true
+			*targetChar = r
+			*prevChar = r
+		} else {
+			writeStr(strBuild, r, prevChar, targetChar, escapedChar, escaped, repeatCount)
+		}
 	}
 	return err
 }
