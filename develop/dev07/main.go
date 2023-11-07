@@ -45,6 +45,7 @@ fmt.Printf(“done after %v”, time.Since(start))
 
 func main() {
 	checkDone := make(chan interface{})
+	defer close(checkDone)
 	sig := func(after time.Duration) <-chan interface{} {
 		c := make(chan interface{})
 		go func() {
