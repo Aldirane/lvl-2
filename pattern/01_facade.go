@@ -3,7 +3,7 @@
 который позволяет предоставить простой интерфейс для более сложной системы структур.
 */
 
-package main
+package pattern
 
 import "fmt"
 
@@ -57,7 +57,7 @@ func (f *Facade) Operation2() {
 }
 
 // Использование фасада
-func main() {
+func FacadeBuild() {
 	facade := NewFacade()
 
 	// Выполнение сложных операций с использованием фасада

@@ -3,7 +3,7 @@
 с использованием одного и того же конструирующего кода.
 */
 
-package main
+package pattern
 
 import "fmt"
 
@@ -52,7 +52,7 @@ func (d *Director) Construct() {
 	d.builder.BuildPartC()
 }
 
-func main() {
+func BuilderBuild() {
 	builder := &ConcreteBuilder{}
 	director := &Director{builder: builder}
 
@@ -74,7 +74,7 @@ func main() {
 который имплементирует интерфейс Builder и строит объект типа Product.
 Директор Director отвечает за последовательность шагов построения объекта,
 а именно вызов методов BuildPartA(), BuildPartB() и BuildPartC() у строителя.
-В функции main() создается экземпляр строителя ConcreteBuilder,
+В функции BuilderBuild() создается экземпляр строителя ConcreteBuilder,
 который затем передается в директор и через директор строится объект типа Product.
 Результат можно увидеть в выводе.
 */

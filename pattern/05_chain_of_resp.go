@@ -1,4 +1,4 @@
-package main
+package pattern
 
 import "fmt"
 
@@ -61,7 +61,7 @@ func (ch3 *ConcreteHandler3) Handle(request Request) {
 	}
 }
 
-func main() {
+func ChainBuild() {
 	handler1 := &ConcreteHandler1{}
 	handler2 := &ConcreteHandler2{}
 	handler3 := &ConcreteHandler3{}
@@ -89,6 +89,6 @@ func main() {
 Если он может, то выводит сообщение, что он обработал запрос.
 Если не может, то передает запрос следующему обработчику.
 Если нет следующего обработчика, то запрос не будет обработан ни одним из обработчиков.
-В main создаются обработчики и устанавливается последовательность их вызова (handler1 -> handler2 -> handler3).
+В ChainBuild создаются обработчики и устанавливается последовательность их вызова (handler1 -> handler2 -> handler3).
 Далее создаются четыре запроса и вызывается у первого обработчика метод Handle для каждого запроса.
 */

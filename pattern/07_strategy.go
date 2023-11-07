@@ -1,4 +1,4 @@
-package main
+package pattern
 
 import "fmt"
 
@@ -48,7 +48,7 @@ func (c *SortContext) Sort(arr []int) []int {
 	return c.strategy.Sort(arr)
 }
 
-func main() {
+func StrategyBuild() {
 	// Создание контекста с стратегией сортировки по возрастанию
 	context := SortContext{}
 	context.SetStrategy(AscendingSortStrategy{})
@@ -66,7 +66,7 @@ func main() {
 В этом примере определены две конкретные стратегии сортировки: AscendingSortStrategy и DescendingSortStrategy,
 реализующие метод Sort сортировки массива чисел по возрастанию и убыванию соответственно.
 Контекст SortContext использует интерфейс SortStrategy, который позволяет установить стратегию сортировки и вызвать метод Sort.
-В функции main создается контекст с начальной стратегией сортировки по возрастанию,
+В функции StrategyBuild создается контекст с начальной стратегией сортировки по возрастанию,
 а затем вызывается метод Sort для сортировки массива.
 Затем изменяется стратегия сортировки на DescendingSortStrategy и выполняется снова метод Sort.
 Выходные данные будут:
