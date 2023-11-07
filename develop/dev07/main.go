@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 	"time"
 )
@@ -43,6 +44,7 @@ fmt.Printf(“done after %v”, time.Since(start))
 */
 
 func main() {
+	checkDone := make(chan interface{})
 	sig := func(after time.Duration) <-chan interface{} {
 		c := make(chan interface{})
 		go func() {
@@ -54,18 +56,37 @@ func main() {
 	}
 
 	start := time.Now()
-	<-or(
+	<-orFirst(
+		checkDone,
 		sig(2*time.Hour),
 		sig(5*time.Minute),
 		sig(1*time.Second),
 		sig(1*time.Hour),
 		sig(1*time.Minute),
 		sig(1*time.Second),
+		sig(1*time.Second),
+		sig(1*time.Second),
+		sig(1*time.Second),
+		sig(1*time.Second),
+		sig(1*time.Second),
 	)
-	fmt.Printf("done after %v\n", time.Since(start))
+	fmt.Printf("First or done after %v\n", time.Since(start))
+	<-orSecond(
+		sig(2*time.Hour),
+		sig(5*time.Minute),
+		sig(1*time.Second),
+		sig(1*time.Hour),
+		sig(1*time.Minute),
+		sig(1*time.Second),
+		sig(1*time.Second),
+		sig(1*time.Second),
+		sig(1*time.Second),
+		sig(1*time.Second),
+	)
+	fmt.Printf("Second or done after %v\n", time.Since(start))
 }
 
-func or(channels ...<-chan interface{}) <-chan interface{} {
+func orFirst(checkDone chan interface{}, channels ...<-chan interface{}) <-chan interface{} {
 	done := make(chan interface{})
 	go func() {
 		defer close(done)
@@ -78,7 +99,13 @@ func or(channels ...<-chan interface{}) <-chan interface{} {
 			go func(ch <-chan interface{}, mu *sync.RWMutex, countGo *int, i int) {
 				for val := range ch {
 					fmt.Printf("Goroutine # %d done\n", i+1)
-					done <- val
+					select {
+					case <-checkDone:
+						checkDone <- 1
+					default:
+						done <- val
+					}
+					checkDone <- 1
 					mu.Lock()
 					*countGo += 1
 					mu.Unlock()
@@ -102,4 +129,17 @@ func or(channels ...<-chan interface{}) <-chan interface{} {
 		wg.Wait()
 	}()
 	return done
+}
+
+func orSecond(channels ...<-chan interface{}) <-chan interface{} {
+	done2 := make(chan interface{})
+	go func() {
+		defer close(done2)
+		cases := make([]reflect.SelectCase, len(channels))
+		for i, ch := range channels {
+			cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ch)}
+		}
+		reflect.Select(cases)
+	}()
+	return done2
 }
