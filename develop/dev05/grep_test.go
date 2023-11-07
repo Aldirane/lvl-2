@@ -7,7 +7,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAnagram(t *testing.T) {
+func TestGrepCount(t *testing.T) {
+	input := []string{
+		"1", "1", "1", "1", "1", "6", "7", "8",
+	}
+	want := 5
+	grepApp := greppkg.GrepApp{
+		Pattern: "1",
+		Count:   true,
+	}
+	count := grepApp.CountLines(input)
+	if want != count {
+		t.Fatalf(`Result = %d, want match for %d`, count, want)
+	}
+}
+
+func TestGrep(t *testing.T) {
 	testCases := []struct {
 		desc string
 		app  greppkg.GrepApp
@@ -17,9 +32,6 @@ func TestAnagram(t *testing.T) {
 		{
 			desc: "normal",
 			app: greppkg.GrepApp{
-				Input: []string{
-					"1", "2", "3", "4", "5", "6", "7", "8",
-				},
 				Pattern: "4",
 			},
 			data: []string{
@@ -32,9 +44,6 @@ func TestAnagram(t *testing.T) {
 		{
 			desc: "inverted",
 			app: greppkg.GrepApp{
-				Input: []string{
-					"1", "2", "3", "4", "5", "6", "7", "8",
-				},
 				Pattern: "4",
 				Invert:  true,
 			},
@@ -48,9 +57,6 @@ func TestAnagram(t *testing.T) {
 		{
 			desc: "before",
 			app: greppkg.GrepApp{
-				Input: []string{
-					"1", "2", "3", "4", "5", "6", "7", "8",
-				},
 				Pattern: "4",
 				Before:  2,
 			},
@@ -64,9 +70,6 @@ func TestAnagram(t *testing.T) {
 		{
 			desc: "after",
 			app: greppkg.GrepApp{
-				Input: []string{
-					"1", "2", "3", "4", "5", "6", "7", "8",
-				},
 				Pattern: "4",
 				After:   2,
 			},
@@ -80,9 +83,6 @@ func TestAnagram(t *testing.T) {
 		{
 			desc: "context",
 			app: greppkg.GrepApp{
-				Input: []string{
-					"1", "2", "3", "4", "5", "6", "7", "8",
-				},
 				Pattern: "4",
 				Context: 2,
 			},
@@ -96,7 +96,7 @@ func TestAnagram(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			got := tC.app.GetLines()
+			got := tC.app.GetLines(tC.data)
 			assert.Equal(t, tC.want, got)
 		})
 	}

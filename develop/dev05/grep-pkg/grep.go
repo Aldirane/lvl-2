@@ -34,7 +34,6 @@ type GrepApp struct {
 	LineNum    bool
 	Pattern    string
 	reader     *os.File
-	Input      []string
 }
 
 func (grepApp *GrepApp) setFlags(args []string) error {
@@ -86,6 +85,7 @@ func (grepApp *GrepApp) setFlags(args []string) error {
 }
 
 func (grepApp *GrepApp) run() error {
+	var input []string
 	defer grepApp.reader.Close()
 	scanner := bufio.NewScanner(grepApp.reader)
 	for scanner.Scan() {
@@ -93,7 +93,7 @@ func (grepApp *GrepApp) run() error {
 		if grepApp.IgnoreCase {
 			line = strings.ToLower(line)
 		}
-		grepApp.Input = append(grepApp.Input, line)
+		input = append(input, line)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -101,10 +101,10 @@ func (grepApp *GrepApp) run() error {
 	}
 
 	if grepApp.Count {
-		CountLines := grepApp.CountLines()
+		CountLines := grepApp.CountLines(input)
 		fmt.Printf("Total lines match = %d\n", CountLines)
 	} else {
-		toPrintLines := grepApp.GetLines()
+		toPrintLines := grepApp.GetLines(input)
 		for _, line := range toPrintLines {
 			fmt.Print(line)
 		}
@@ -114,12 +114,12 @@ func (grepApp *GrepApp) run() error {
 }
 
 // Функция для поиска и печати строк с указанными параметрами
-func (grepApp *GrepApp) GetLines() []string {
-	BeforeLines := grepApp.Input[:]
-	AfterLines := grepApp.Input[:]
-	ContextLines := grepApp.Input[:]
+func (grepApp *GrepApp) GetLines(input []string) []string {
+	BeforeLines := input
+	AfterLines := input
+	ContextLines := input
 	toPrint := make([]string, 0)
-	for lineCount, line := range grepApp.Input {
+	for lineCount, line := range input {
 
 		// Проверка наличия совпадения
 		match := false
@@ -160,8 +160,8 @@ func (grepApp *GrepApp) GetLines() []string {
 				toPrint = append(toPrint, fmt.Sprintln("After match"))
 				start := lineCount + 1
 				finish := lineCount + grepApp.After + 1
-				if finish > len(grepApp.Input) {
-					finish = len(grepApp.Input)
+				if finish > len(input) {
+					finish = len(input)
 				}
 				for i := start; i < finish; i++ {
 					al := AfterLines[i]
@@ -183,8 +183,8 @@ func (grepApp *GrepApp) GetLines() []string {
 				if start < 0 {
 					start = 0
 				}
-				if finish > len(grepApp.Input) {
-					finish = len(grepApp.Input)
+				if finish > len(input) {
+					finish = len(input)
 				}
 				for i := start; i < finish; i++ {
 					cl := ContextLines[i]
@@ -225,7 +225,12 @@ func (grepApp *GrepApp) GetLines() []string {
 			// Печать строк после совпадения
 			if grepApp.After > 0 {
 				toPrint = append(toPrint, fmt.Sprintln("After match"))
-				for i := lineCount + 1; i < len(grepApp.Input); i++ {
+				start := lineCount + 1
+				finish := lineCount + grepApp.After + 1
+				if finish > len(input) {
+					finish = len(input)
+				}
+				for i := start; i < finish; i++ {
 					al := AfterLines[i]
 					match = strings.Contains(al, grepApp.Pattern)
 					if !match {
@@ -245,8 +250,8 @@ func (grepApp *GrepApp) GetLines() []string {
 				if start < 0 {
 					start = 0
 				}
-				if finish > len(grepApp.Input) {
-					finish = len(grepApp.Input)
+				if finish > len(input) {
+					finish = len(input)
 				}
 				for i := start; i < finish; i++ {
 					cl := ContextLines[i]
@@ -266,9 +271,9 @@ func (grepApp *GrepApp) GetLines() []string {
 }
 
 // Функция для подсчета количества строк с указанным параметром
-func (grepApp *GrepApp) CountLines() int {
+func (grepApp *GrepApp) CountLines(input []string) int {
 	count := 0
-	for _, line := range grepApp.Input {
+	for _, line := range input {
 		// Проверка наличия совпадения
 		match := false
 		match = strings.Contains(line, grepApp.Pattern)
