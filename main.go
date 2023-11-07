@@ -20,5 +20,5 @@ func main() {
 	//// 07 strategy
 	//pattern.StrategyBuild()
 	// 08 state
-	pattern.StatetBuild()
+	pattern.StateBuild()
 }
